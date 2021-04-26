@@ -15,7 +15,7 @@ $ pip install drf-firebase-auth
 > ### Important Django user setup
 > In your Django default user model (after inheriting from AbstractUser as a Custom user class), add a CharField `uid` with the `blank=True` option set. This field provides the mapping from a FirebaseUser to the local User.
 >
-> When registering a new local User, set `uid` to the *idToken* retrieved from Firebase Auth's client interface.
+> When registering a new local User, set `uid` to the *User UID* retrieved from Firebase Auth's client interface.
 
 Add the application to your project's `INSTALLED_APPS` in `settings.py`.
 
