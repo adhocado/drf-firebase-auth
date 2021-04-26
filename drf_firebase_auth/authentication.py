@@ -12,6 +12,7 @@ from django.utils.encoding import smart_text
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
+from django.core.exceptions import FieldError
 from rest_framework import (
     authentication,
     exceptions
@@ -99,10 +100,11 @@ class FirebaseAuthentication(authentication.TokenAuthentication):
         Attempts to return or create a local User from Firebase user data
         """
         email = get_firebase_user_email(firebase_user)
-        log.info(f'_get_or_create_local_user - email: {email}')
+        uid = firebase_user.uid
+        log.info(f'_get_or_create_local_user - uid: {uid}')
         user = None
         try:
-            user = User.objects.get(email=email)
+            user = User.objects.get(uid=uid)
             log.info(
                 f'_get_or_create_local_user - user.is_active: {user.is_active}'
             )
@@ -112,9 +114,14 @@ class FirebaseAuthentication(authentication.TokenAuthentication):
                 )
             user.last_login = timezone.now()
             user.save()
+        except FieldError as e:
+            log.error(
+                f'_get_or_create_local_user - FieldError: uid'
+            )
+            raise Exception('User model does not contain `uid` field.')
         except User.DoesNotExist as e:
             log.error(
-                f'_get_or_create_local_user - User.DoesNotExist: {email}'
+                f'_get_or_create_local_user - User.DoesNotExist: {uid}'
             )
             if not api_settings.FIREBASE_CREATE_LOCAL_USER:
                 raise Exception('User is not registered to the application.')
