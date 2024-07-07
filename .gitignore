@@ -17,3 +17,6 @@ venv/
 
 # other
 README.hidden.md
+
+# PyCharm
+.idea
